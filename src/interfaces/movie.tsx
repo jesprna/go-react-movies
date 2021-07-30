@@ -7,4 +7,5 @@ export interface IMovie {
     rating?:number;
     description?: string;
     poster?:string,
+    genres?:any,
 }

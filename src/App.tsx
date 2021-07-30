@@ -1,14 +1,14 @@
 import {BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import Movies from './pages/Movies';
+import { Movies } from './pages/Movies';
 import Home from './pages/Home';
-import Admin from './pages/Admin';
+import {Admin} from './pages/Admin';
 import Header from './components/Header';
-import OneMovie from './components/OneMovie';
-import Genres from './components/Genres';
-import OneGenre from './components/OneGenre';
-import EditMovie, { IEditMovieProps } from './pages/EditMovie';
-import  React, { Fragment }  from 'react';
-import Login, { ILoginProps } from './pages/Login'
+import {OneMovie} from './components/OneMovie';
+import {Genres} from './components/Genres';
+import {OneGenre} from './components/OneGenre';
+import { IEditMovieProps, EditMovie } from './pages/EditMovie';
+import  React, { Fragment, useState, useEffect }  from 'react';
+import { ILoginProps, Login } from './pages/Login'
 import { IAdminProps } from './pages/Admin'
 import GraphQL from './pages/GraphQL';
 import OneMovieGraphQL from './pages/OneMovieGraphQL';
@@ -21,37 +21,30 @@ interface IAppState {
    jwt: string
 }
 
-export default class App extends  React.Component<IAppProps, IAppState> {
-  constructor(props: IAppProps){
-    super(props)
-    this.state = {
-      jwt: ""
-    }
-    this.handleJWTChange(this.handleJWTChange.bind(this))
-  }
+export const App = ()=> {
+  const [jwt, setJWT]  =useState<string>("");
 
-  componentDidMount(){
+  useEffect(()=>{
     let t = window.localStorage.getItem("jwt")
     if (t){
-      if (this.state.jwt === ""){
-        this.setState({jwt: JSON.parse(t)})
+      if (jwt === ""){
+        setJWT(JSON.parse(t))
       }
     }
+  },[jwt])
+
+  const handleJWTChange = (jwt:any)=>{
+    setJWT(jwt);
   }
 
-  handleJWTChange = (jwt:any)=>{
-    this.setState({jwt: jwt});
-  }
-
-  logout = ()=>{
-    this.setState({jwt:""});
+  const logout = ()=>{
+    setJWT("")
     window.localStorage.removeItem("jwt")
 
   }
 
-  render(){
-    let loginLink;
-    if(this.state.jwt === ""){
+  let loginLink;
+    if(jwt === ""){
       loginLink = <Link to="/login">
          <div className="flex p-3 text-white bg-blue-500 rounded cursor-pointer text-center text-sm">
             <button className="rounded inline-flex items-center ">
@@ -60,7 +53,7 @@ export default class App extends  React.Component<IAppProps, IAppState> {
           </div>
       </Link>
     }else{
-      loginLink = <Link to="/logout" onClick={this.logout}>
+      loginLink = <Link to="/logout" onClick={logout}>
          <div className="flex p-3 text-white bg-red-500 rounded cursor-pointer text-center text-sm">
             <button className="rounded inline-flex items-center ">
               <span className="font-semibold">Logout</span>
@@ -68,8 +61,9 @@ export default class App extends  React.Component<IAppProps, IAppState> {
           </div>
       </Link>
     }
-    return (
-      <Router>
+
+  return (
+    <Router>
          <>
   
       <Header />
@@ -89,7 +83,7 @@ export default class App extends  React.Component<IAppProps, IAppState> {
             <div  className="bg-gray-900 text-white p-2 rounded mt-2 cursor-pointer hover:bg-gray-700 hover:text-blue-300">
            Genres
               </div></Link>
-              {this.state.jwt !== "" && <Fragment>
+              {jwt !== "" && <Fragment>
               <Link to="/admin/movie/0" >
             <div  className="bg-gray-900 text-white p-2 rounded mt-2 cursor-pointer hover:bg-gray-700 hover:text-blue-300">
            Add Movie
@@ -112,7 +106,9 @@ export default class App extends  React.Component<IAppProps, IAppState> {
    
     <section className="w-full p-4">
       <Switch>
-           <Route path="/movies/:id" component={OneMovie}/>
+           <Route path="/movies/:id" >
+              <OneMovie />
+           </Route>
            <Route path="/moviesgraphql/:id" component={OneMovieGraphQL}/>
     
            <Route path="/movies">
@@ -125,16 +121,18 @@ export default class App extends  React.Component<IAppProps, IAppState> {
            <Route exact path="/graphql">
                 <GraphQL />
            </Route>
-           <Route path="/genres/:id" component={OneGenre}/>
+           <Route path="/genres/:id" >
+             <OneGenre />
+             </Route>
 
            <Route path="/login" component={(props: ILoginProps) =>  (
-           <Login {...props} handleJWTChange={this.handleJWTChange}/>)} 
+           <Login {...props} handleJWTChange={handleJWTChange}/>)} 
            />
            <Route path="/admin/movie/:id" component={(props: IEditMovieProps) => (
-             <EditMovie {...props} jwt={this.state.jwt}  /> ) }
+             <EditMovie {...props} jwt={jwt}  /> ) }
             />
            <Route path="/admin" component={(props: IAdminProps) => (
-             <Admin {...props} jwt={this.state.jwt}  /> ) }
+             <Admin {...props} jwt={jwt}  /> ) }
             />
            <Route path="/">
                 <Home />
@@ -146,9 +144,5 @@ export default class App extends  React.Component<IAppProps, IAppState> {
     </main>
       </>
       </Router>
-     
-    );
-  }
-  
+  )
 }
-
